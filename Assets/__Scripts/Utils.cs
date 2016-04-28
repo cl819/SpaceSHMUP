@@ -31,12 +31,12 @@ public class Utils : MonoBehaviour
 	public static Bounds CombineBoundsOfChildren(GameObject go) 
 	{
 		Bounds b = new Bounds (Vector3.zero, Vector3.zero);
-		if (go.renderer != null) {
-			b = BoundsUnion(b, go.renderer.bounds);
+		if (go.GetComponent<Renderer>() != null) {
+			b = BoundsUnion(b, go.GetComponent<Renderer>().bounds);
 		}
 
-		if (go.collider != null) {
-			b = BoundsUnion(b, go.collider.bounds);
+		if (go.GetComponent<Collider>() != null) {
+			b = BoundsUnion(b, go.GetComponent<Collider>().bounds);
 		}
 
 		foreach (Transform t in go.transform) {
@@ -192,7 +192,37 @@ public class Utils : MonoBehaviour
 	
 	} // end BoundsInBoundsCheck
 	
-	
+	//this function will iteratively climb up the transform.parent tree
+	public static GameObject FindTaggedParent(GameObject go){
+		//if this gameObject has a tag
+		if(go.tag!="Untagged"){
+			//then return this game object
+			return (go);
+		}//end if
+		//if there is o parent of this Transform
+		if (go.transform.parent == null) {
+			//we've reached the top of the hierarchy with no interesting tag
+			//return null
+			return(null);
+		}//end if ==null
+		//otherwise recursively climb up the tree
+		return(FindTaggedParent(go.transform.parent.gameObject));
+	}//end FindTaggedParent
+
+	public static GameObject FindTaggedParent(Transform t){
+		return(FindTaggedParent (t.gameObject));
+	}//end find tagged parent
+
+	static public Material[]GetAllMaterials(GameObject go){
+		List<Material> mats = new List<Material> ();
+		if (go.GetComponent<Renderer>() != null) {
+			mats.Add (go.GetComponent<Renderer>().material);
+		}
+		foreach (Transform t in go.transform) {
+			mats.AddRange (GetAllMaterials (t.gameObject));
+		}
+		return(mats.ToArray ());
+	}
 	
 }// End of Util Class
 
